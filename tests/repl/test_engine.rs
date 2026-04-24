@@ -408,10 +408,7 @@ fn default_value12() -> TestResult {
 
 #[test]
 fn default_value_glob() -> TestResult {
-    run_test(
-        r#"def foo [--x:glob = *.nu] { $x | describe }; foo"#,
-        "glob",
-    )
+    run_test("def foo [--x:glob = *.nu] { $x | describe }; foo", "glob")
 }
 
 #[test]
