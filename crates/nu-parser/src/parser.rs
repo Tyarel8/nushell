@@ -4723,31 +4723,11 @@ pub fn parse_signature_helper(
                                         flag.arg.clone().unwrap_or(SyntaxShape::Any)
                                     }
                                 };
-                                let mut expression = parse_value(working_set, span, &SyntaxShape::Any);
-
-                                let var_id = match last {
-                                    Arg::Positional { arg, .. } => arg.var_id,
-                                    Arg::RestPositional(arg) => arg.var_id,
-                                    Arg::Flag { flag, .. } => flag.var_id,
+                                let expression = if shape == SyntaxShape::GlobPattern {
+                                    parse_value(working_set, span, &SyntaxShape::GlobPattern)
+                                } else {
+                                    parse_value(working_set, span, &SyntaxShape::Any)
                                 };
-
-                                let mut type_is_compatible = true;
-                                if let Some(var_id) = var_id {
-                                    let var_type = &working_set.get_variable(var_id).ty;
-                                    if !matches!(var_type, Type::Any) && !type_compatible(var_type, &expression.ty) {
-                                        type_is_compatible = false;
-                                    }
-                                }
-
-                                if type_is_compatible {
-                                    let error_count_before_reparse = working_set.parse_errors.len();
-                                    let coerced_expression = parse_value(working_set, span, &shape);
-                                    if working_set.parse_errors.len() == error_count_before_reparse {
-                                        expression = coerced_expression;
-                                    } else {
-                                        working_set.parse_errors.truncate(error_count_before_reparse);
-                                    }
-                                }
 
                                 //TODO check if we're replacing a custom parameter already
                                 match last {
